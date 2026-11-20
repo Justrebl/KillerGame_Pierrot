@@ -2,6 +2,8 @@
 
 Petite app mobile pour un jeu de l'assassin à killer unique. Pierrot est le seul utilisateur authentifié; les autres personnes sont des cibles visibles seulement après connexion. GitHub Pages sert le frontend et Cloudflare Workers/D1/R2 stockent l'état et les photos chiffrées.
 
+Consultez la [référence des décisions techniques](docs/decisions.md) pour comprendre l'architecture, les contraintes de confidentialité et l'état d'avancement.
+
 ## Architecture
 
 - `docs/`: frontend statique publié avec GitHub Pages.
