@@ -1,5 +1,6 @@
 const encoder = new TextEncoder();
 const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
+const MAX_KDF_ITERATIONS = 100000;
 const SESSION_TTL_MS = 12 * 60 * 60 * 1000;
 const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000;
 
@@ -82,7 +83,8 @@ async function getSessionPayload(env, eventId) {
     "SELECT encryption_salt, kdf_iterations FROM events WHERE id = ?"
   ).bind(eventId).first();
   const rows = await env.DB.prepare(`
-    SELECT t.id, t.name, t.condition, v.id AS victory_id, v.created_at AS completed_at
+    SELECT t.id, t.name, t.condition, v.id AS victory_id, v.created_at AS completed_at,
+           v.photo_key
     FROM targets t
     LEFT JOIN victories v ON v.target_id = t.id
     WHERE t.event_id = ?
@@ -96,7 +98,8 @@ async function getSessionPayload(env, eventId) {
       name: target.name,
       condition: target.condition,
       victoryId: target.victory_id,
-      completedAt: target.completed_at
+      completedAt: target.completed_at,
+      photoPresent: Boolean(target.photo_key)
     }))
   };
 }
@@ -110,6 +113,9 @@ async function login(request, env, cors) {
     "SELECT id, credential_verifier, auth_salt, kdf_iterations FROM events LIMIT 1"
   ).first();
   if (!event) return json({ error: "Événement introuvable" }, 404, cors);
+  if (event.kdf_iterations > MAX_KDF_ITERATIONS) {
+    return json({ error: "Configuration de sécurité non prise en charge" }, 503, cors);
+  }
   const clientIp = request.headers.get("CF-Connecting-IP") || "local";
   if (!await consumeRateLimit(env, `login:${clientIp}`, 10)) {
     return json({ error: "Trop de tentatives; réessaie plus tard" }, 429, cors);
@@ -184,7 +190,11 @@ export default {
         if (!object) return json({ error: "Photo introuvable" }, 404, cors);
         return new Response(object.body, {
           status: 200,
-          headers: { "Content-Type": "application/octet-stream", ...cors }
+          headers: {
+            "Content-Type": "application/octet-stream",
+            "Cache-Control": "private, no-store",
+            ...cors
+          }
         });
       }
       if (request.method === "DELETE") {

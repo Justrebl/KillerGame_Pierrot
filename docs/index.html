@@ -30,6 +30,16 @@
       </header>
       <div id="target-list" class="target-list"></div>
       <p id="global-error" class="error" role="alert"></p>
+      <dialog id="photo-dialog" class="photo-dialog" aria-labelledby="photo-title">
+        <div class="photo-dialog__header">
+          <h2 id="photo-title">Photo de la cible</h2>
+          <form method="dialog">
+            <button class="secondary" type="submit" aria-label="Fermer la photo">Fermer</button>
+          </form>
+        </div>
+        <img id="photo-image" class="photo-dialog__image" alt="" hidden>
+        <p id="photo-status" role="status"></p>
+      </dialog>
     </section>
   </main>
 
@@ -38,13 +48,14 @@
       <div class="target-card__header">
         <div>
           <p class="target-position"></p>
-          <h2 class="target-name"></h2>
+          <h2 class="target-name" tabindex="-1"></h2>
         </div>
         <span class="target-status"></span>
       </div>
       <p class="target-condition"></p>
       <button class="victory-button" type="button">Condition respectée</button>
       <p class="victory-state" role="status"></p>
+      <button class="photo-view-button secondary" type="button" hidden>Voir la photo</button>
       <form class="photo-form" hidden>
         <label>
           Preuve photo

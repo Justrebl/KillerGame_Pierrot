@@ -66,6 +66,7 @@ Le générateur enregistre un vérificateur dérivé du mot de passe. Le mot de 
 | Mot de passe | Un mot de passe d'événement pour le killer | Réduit la configuration et correspond au besoin réel |
 | Conditions de victoire | Une condition et un horodatage par cible | Permet de suivre chaque cible indépendamment |
 | Photos | Chiffrement AES-GCM dans le navigateur | Aucun JPEG en clair n'est envoyé au stockage |
+| Consultation des photos | Déchiffrement local dans une boîte de dialogue accessible | Conserve la protection R2 tout en permettant à Pierrot de revoir ses preuves |
 | Données privées | Fichier de seed local ignoré par Git | Empêche la publication des noms, défis et mot de passe |
 | Complexité | HTML, CSS et JavaScript sans framework UI | Maintien du principe KISS |
 
@@ -88,9 +89,12 @@ Le générateur enregistre un vérificateur dérivé du mot de passe. Le mot de 
 | Modèle D1 à killer unique | Implémenté |
 | Routes de session, victoire et photo | Implémentées |
 | Chiffrement photo côté navigateur | Implémenté |
-| Seed privé local | Implémenté |
-| Déploiement Cloudflare | À finaliser |
-| Validation Node, D1, R2 et navigateur | À exécuter après installation des outils |
+| Consultation des photos chiffrées | Implémentée |
+| Configuration Wrangler, migration et identifiant D1 | Implémentée |
+| Seed privé local testable | Implémenté avec 100 000 itérations |
+| Tests Node Worker/D1/R2 et navigateur | Implémentés |
+| Déploiement Cloudflare et migration distante | À autoriser séparément |
+| Validation du Worker de production | À exécuter après le premier déploiement |
 
 ## Notes and limitations
 
@@ -99,8 +103,9 @@ Le générateur enregistre un vérificateur dérivé du mot de passe. Le mot de 
 - Les noms et défis présents dans `worker/event.local.json` restent privés, mais ils doivent être considérés comme accessibles aux personnes autorisées dans D1.
 - Le mot de passe reste sensible: il sert à l'accès et à la dérivation de la clé de chiffrement. Sa perte rend le déchiffrement impossible.
 - Le remplaçage d'une photo met à jour D1 seulement après acceptation par R2; il n'existe pas de transaction atomique inter-services.
-- Le champ `database_id` de `wrangler.jsonc` et l'URL du Worker dans `docs/config.js` sont des valeurs de déploiement à renseigner localement.
-- Les validations exécutables ne sont pas considérées comme réussies tant que Node.js, Wrangler, D1, R2 et un navigateur n'ont pas exécuté les vérifications prévues.
+- Le `database_id` de D1 est configuré dans `wrangler.jsonc`; seule l'URL finale du Worker reste à renseigner dans `docs/config.js` après le déploiement.
+- Les validations locales couvrent le code, les doubles D1/R2, le chiffrement Web Crypto, le Worker local et le navigateur Edge. Elles ne prouvent pas le comportement du Worker public avant son déploiement.
+- Le premier accès à une photo utilise un GET binaire authentifié; la réponse Worker demande `Cache-Control: private, no-store`.
 
 ## Publication policy
 
