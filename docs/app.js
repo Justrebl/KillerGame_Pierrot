@@ -155,16 +155,25 @@ function updateProgress() {
 }
 
 async function encryptPhoto(file, victoryId) {
-  if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-    throw new Error("Choisis une image JPEG, PNG ou WebP.");
+  if (!file.type.startsWith("image/")) {
+    throw new Error("Choisis une image.");
   }
   if (file.size > MAX_PHOTO_BYTES) throw new Error("La photo dépasse 5 Mo.");
-  const bitmap = await createImageBitmap(file);
+  let bitmap;
+  try {
+    bitmap = await createImageBitmap(file);
+  } catch {
+    throw new Error("Cette photo utilise un format que ce navigateur ne peut pas lire.");
+  }
   const canvas = document.createElement("canvas");
-  const scale = Math.min(1, 1600 / Math.max(bitmap.width, bitmap.height));
-  canvas.width = Math.round(bitmap.width * scale);
-  canvas.height = Math.round(bitmap.height * scale);
-  canvas.getContext("2d").drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  try {
+    const scale = Math.min(1, 1600 / Math.max(bitmap.width, bitmap.height));
+    canvas.width = Math.round(bitmap.width * scale);
+    canvas.height = Math.round(bitmap.height * scale);
+    canvas.getContext("2d").drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  } finally {
+    bitmap.close();
+  }
   const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.82));
   if (!blob || blob.size > MAX_PLAINTEXT_PHOTO_BYTES) {
     throw new Error("Impossible de préparer une photo sous la limite chiffrée.");
