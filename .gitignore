@@ -1,0 +1,5 @@
+node_modules/
+.wrangler/
+.private/
+.copilot-tracking/
+worker/event.local.json
