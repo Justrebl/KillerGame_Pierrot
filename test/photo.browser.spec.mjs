@@ -43,6 +43,16 @@ async function preparePage(page, photoRoute) {
   await page.getByRole("button", { name: "Ouvrir les dossiers" }).click();
 }
 
+test("proof input leaves iOS camera and Photos choices available", async ({ page }) => {
+  await preparePage(page, (route) => route.abort());
+  const input = page.getByLabel("Prendre une photo ou choisir dans Photos");
+
+  await expect(input).toBeVisible();
+  await expect(input).toHaveAttribute("type", "file");
+  await expect(input).toHaveAttribute("accept", "image/*");
+  await expect(input).not.toHaveAttribute("capture");
+});
+
 test("photo viewer decrypts, is keyboard accessible, and revokes its URL", async ({ page }) => {
   const payload = await encryptPhotoBytes(jpeg, password, session, victoryId);
   await preparePage(page, (route) => route.fulfill({
