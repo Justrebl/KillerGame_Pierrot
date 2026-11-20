@@ -1,0 +1,14 @@
+{
+  "name": "killer-game-pierrot",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node --check docs/app.js && node --check worker/src/index.js",
+    "seed": "node worker/scripts/seed.mjs",
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}
