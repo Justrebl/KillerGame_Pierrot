@@ -3,3 +3,5 @@ node_modules/
 .private/
 .copilot-tracking/
 worker/event.local.json
+playwright-report/
+test-results/
